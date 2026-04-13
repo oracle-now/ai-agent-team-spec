@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "kind": "release_policy_v1",
+  "policy_id": "default_webapp_policy",
+  "environments": {
+    "preview": {
+      "required_approvals": [],
+      "max_risk_level": "high",
+      "notes": "Deploy freely for preview; no critic required"
+    },
+    "staging": {
+      "required_approvals": ["critic"],
+      "max_risk_level": "medium",
+      "notes": "Critic must approve before staging deploy is considered valid for prod gate"
+    },
+    "production": {
+      "required_approvals": ["critic"],
+      "max_risk_level": "low",
+      "notes": "Critic approval required. High risk level blocks production deploy."
+    }
+  },
+  "blocking_findings": {
+    "high": true,
+    "medium": false,
+    "low": false
+  },
+  "required_artifacts": [
+    "micro_spec_v1",
+    "implementation_artifact_v1",
+    "deploy_artifact_v1",
+    "review_artifact_v1"
+  ],
+  "retry_policy": {
+    "max_auto_retries": 1,
+    "escalate_after_failures": 2,
+    "escalation_target": "human"
+  },
+  "concurrency": {
+    "platform_actions_serialized": true,
+    "critic_reviews_serialized_per_deploy": true,
+    "parallel_builds_allowed": true,
+    "parallel_build_constraint": "Must not touch the same routes, components, endpoints, schema areas, or deployment units"
+  }
+}
