@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "micro_spec_v1",
+  "title": "Micro Spec v1",
+  "description": "One atomic unit of planned work. One behavior, one owner, one acceptance block. Produced by Planner agent only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trace_id", "agent", "kind", "micro_spec_id", "title", "intent", "owner_type", "risk_level", "inputs", "non_goals", "acceptance_criteria", "dependencies", "parent_artifact_ids", "started_at", "finished_at", "status"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "trace_id": { "type": "string" },
+    "agent": { "type": "string", "const": "planner" },
+    "kind": { "type": "string", "const": "micro_spec_v1" },
+    "micro_spec_id": { "type": "string", "description": "Unique ID for this micro-spec e.g. ms_101" },
+    "title": { "type": "string", "description": "Short title for this single behavior" },
+    "intent": { "type": "string", "description": "What this change enables for the user. One sentence." },
+    "owner_type": { "type": "string", "enum": ["frontend", "backend", "frontend_backend", "platform"] },
+    "risk_level": { "type": "string", "enum": ["low", "medium", "high"] },
+    "inputs": { "type": "array", "items": { "type": "string" }, "description": "Existing surfaces or context this change depends on" },
+    "non_goals": { "type": "array", "items": { "type": "string" }, "description": "Explicitly out of scope for this micro-spec" },
+    "acceptance_criteria": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Testable pass/fail criteria. Each item must be independently verifiable." },
+    "dependencies": { "type": "array", "items": { "type": "string" }, "description": "Other micro-spec IDs this must wait for" },
+    "parent_artifact_ids": { "type": "array", "items": { "type": "string" } },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["ok", "needs_clarification"] },
+    "reason": { "type": "string" }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "trace_id": "trc_101",
+      "agent": "planner",
+      "kind": "micro_spec_v1",
+      "micro_spec_id": "ms_101",
+      "title": "Add password visibility toggle",
+      "intent": "Allow users to reveal or hide password input content on the sign-in form",
+      "owner_type": "frontend",
+      "risk_level": "low",
+      "inputs": ["existing sign-in form"],
+      "non_goals": ["No password strength meter", "No backend changes"],
+      "acceptance_criteria": [
+        "User can toggle password visibility on and off",
+        "Default state remains hidden",
+        "Control is keyboard accessible",
+        "No layout shift occurs when toggled"
+      ],
+      "dependencies": [],
+      "parent_artifact_ids": [],
+      "started_at": "2026-04-13T08:58:00-07:00",
+      "finished_at": "2026-04-13T08:58:03-07:00",
+      "status": "ok",
+      "reason": "Single UI behavior with frontend-only ownership"
+    }
+  ]
+}
