@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "run_summary_v1",
+  "title": "Run Summary v1",
+  "description": "Emitted by the Orchestrator at the end of every workflow run (success or failure). Required for observability and auditability.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trace_id", "agent", "kind", "workflow_mode", "micro_spec_ids", "steps", "final_state", "error_codes"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "trace_id": { "type": "string" },
+    "agent": { "type": "string", "const": "orchestrator" },
+    "kind": { "type": "string", "const": "run_summary_v1" },
+    "workflow_mode": { "type": "string", "enum": ["core", "extended"] },
+    "micro_spec_ids": { "type": "array", "items": { "type": "string" } },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["agent", "status", "artifact_id", "duration_ms"],
+        "properties": {
+          "agent": { "type": "string", "enum": ["orchestrator", "planner", "builder_frontend", "builder_backend", "platform", "critic"] },
+          "status": { "type": "string", "enum": ["ok", "blocked", "needs_clarification", "approve", "reject", "human_escalation"] },
+          "artifact_id": { "type": "string" },
+          "duration_ms": { "type": "integer" }
+        }
+      }
+    },
+    "final_state": { "type": "string", "enum": ["approved_for_prod", "rejected", "blocked", "human_escalation"] },
+    "error_codes": { "type": "array", "items": { "type": "string" } }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "trace_id": "trc_101",
+      "agent": "orchestrator",
+      "kind": "run_summary_v1",
+      "workflow_mode": "core",
+      "micro_spec_ids": ["ms_101"],
+      "steps": [
+        { "agent": "planner", "status": "ok", "artifact_id": "art_ms_101", "duration_ms": 2400 },
+        { "agent": "builder_frontend", "status": "ok", "artifact_id": "art_fe_101", "duration_ms": 18000 },
+        { "agent": "platform", "status": "ok", "artifact_id": "art_dep_101", "duration_ms": 9000 },
+        { "agent": "critic", "status": "approve", "artifact_id": "art_rev_101", "duration_ms": 6500 }
+      ],
+      "final_state": "approved_for_prod",
+      "error_codes": []
+    }
+  ]
+}
