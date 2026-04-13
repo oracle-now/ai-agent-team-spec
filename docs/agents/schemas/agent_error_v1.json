@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "agent_error_v1",
+  "title": "Agent Error Envelope v1",
+  "description": "Returned by any agent when it cannot produce a valid success output. ALL agents must use this envelope on failure.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trace_id", "agent", "kind", "error"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "trace_id": { "type": "string", "description": "Unique trace ID for this workflow run" },
+    "agent": { "type": "string", "enum": ["orchestrator", "planner", "builder_frontend", "builder_backend", "platform", "critic"] },
+    "kind": { "type": "string", "const": "agent_error_v1" },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": ["missing_required_input", "invalid_schema", "conflicting_inputs", "blocked_by_policy", "dependency_missing"]
+        },
+        "message": { "type": "string", "description": "Human-readable explanation of the error" },
+        "retryable": { "type": "boolean", "description": "If true, orchestrator may retry once automatically" },
+        "missing_inputs": { "type": "array", "items": { "type": "string" } },
+        "blocked_by": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "trace_id": "trc_123",
+      "agent": "planner",
+      "kind": "agent_error_v1",
+      "error": {
+        "code": "missing_required_input",
+        "message": "user_goal is required but was not provided",
+        "retryable": true,
+        "missing_inputs": ["user_goal"],
+        "blocked_by": []
+      }
+    }
+  ]
+}
