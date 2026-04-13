@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "implementation_artifact_frontend_v1",
+  "title": "Frontend Implementation Artifact v1",
+  "description": "Output of the Builder-Frontend agent. UI/client code changes only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trace_id", "agent", "kind", "artifact_id", "micro_spec_id", "files_changed", "ui_states_covered", "tests_added_or_updated", "known_limits", "parent_artifact_ids", "started_at", "finished_at", "status"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "trace_id": { "type": "string" },
+    "agent": { "type": "string", "const": "builder_frontend" },
+    "kind": { "type": "string", "const": "implementation_artifact_v1" },
+    "artifact_id": { "type": "string" },
+    "micro_spec_id": { "type": "string" },
+    "files_changed": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Must only contain frontend files. Any backend or migration file is a contract violation."
+    },
+    "ui_states_covered": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["loading", "empty", "error", "success", "na"] }
+    },
+    "tests_added_or_updated": { "type": "array", "items": { "type": "string" } },
+    "known_limits": { "type": "array", "items": { "type": "string" } },
+    "parent_artifact_ids": { "type": "array", "items": { "type": "string" } },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["ok", "blocked", "needs_clarification"] },
+    "reason": { "type": "string" }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "trace_id": "trc_101",
+      "agent": "builder_frontend",
+      "kind": "implementation_artifact_v1",
+      "artifact_id": "art_fe_101",
+      "micro_spec_id": "ms_101",
+      "files_changed": ["src/components/PasswordField.tsx", "src/pages/SignIn.tsx"],
+      "ui_states_covered": ["na"],
+      "tests_added_or_updated": ["PasswordField.test.tsx"],
+      "known_limits": [],
+      "parent_artifact_ids": ["ms_101"],
+      "started_at": "2026-04-13T08:59:00-07:00",
+      "finished_at": "2026-04-13T09:07:00-07:00",
+      "status": "ok",
+      "reason": "Implemented frontend-only visibility toggle"
+    }
+  ]
+}
