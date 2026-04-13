@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "deploy_artifact_v1",
+  "title": "Deploy Artifact v1",
+  "description": "Output of the Platform agent. Records every deployment action including migrations, environment URLs, version tags, and rollback handles. Platform is the ONLY agent that produces this artifact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trace_id", "agent", "kind", "artifact_id", "environment", "url", "migration_applied", "version", "rollback_handle", "parent_artifact_ids", "owner_micro_spec_id", "started_at", "finished_at", "status"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "trace_id": { "type": "string" },
+    "agent": { "type": "string", "const": "platform" },
+    "kind": { "type": "string", "const": "deploy_artifact_v1" },
+    "artifact_id": { "type": "string" },
+    "environment": { "type": "string", "enum": ["preview", "staging", "production"] },
+    "url": { "type": "string", "description": "URL of deployed environment" },
+    "migration_applied": { "type": "boolean" },
+    "version": { "type": "string" },
+    "rollback_handle": { "type": "string", "description": "Reference used to trigger rollback if needed" },
+    "parent_artifact_ids": { "type": "array", "items": { "type": "string" } },
+    "owner_micro_spec_id": { "type": "string" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["ok", "blocked", "rejected"] },
+    "reason": { "type": "string" }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "trace_id": "trc_101",
+      "agent": "platform",
+      "kind": "deploy_artifact_v1",
+      "artifact_id": "art_dep_101",
+      "environment": "staging",
+      "url": "https://staging.example.app/build-101",
+      "migration_applied": false,
+      "version": "build-101",
+      "rollback_handle": "rb_101",
+      "parent_artifact_ids": ["art_fe_101"],
+      "owner_micro_spec_id": "ms_101",
+      "started_at": "2026-04-13T09:08:00-07:00",
+      "finished_at": "2026-04-13T09:10:00-07:00",
+      "status": "ok",
+      "reason": "Staging deploy for critic review"
+    }
+  ]
+}
