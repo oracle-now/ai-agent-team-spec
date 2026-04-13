@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "implementation_artifact_backend_v1",
+  "title": "Backend Implementation Artifact v1",
+  "description": "Output of the Builder-Backend agent. Server-side code changes only. Migration scripts are NEVER included here — only migration requests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trace_id", "agent", "kind", "artifact_id", "micro_spec_id", "endpoints_changed", "contracts_changed", "tests_added_or_updated", "migration_request", "parent_artifact_ids", "started_at", "finished_at", "status"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "trace_id": { "type": "string" },
+    "agent": { "type": "string", "const": "builder_backend" },
+    "kind": { "type": "string", "const": "implementation_artifact_v1" },
+    "artifact_id": { "type": "string" },
+    "micro_spec_id": { "type": "string" },
+    "endpoints_changed": { "type": "array", "items": { "type": "string" } },
+    "contracts_changed": { "type": "array", "items": { "type": "string" } },
+    "tests_added_or_updated": { "type": "array", "items": { "type": "string" } },
+    "migration_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["needed", "description"],
+      "properties": {
+        "needed": { "type": "boolean" },
+        "description": { "type": "string", "description": "Human-readable description of what schema change is needed. Never the actual migration script." }
+      }
+    },
+    "parent_artifact_ids": { "type": "array", "items": { "type": "string" } },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["ok", "blocked", "needs_clarification"] },
+    "reason": { "type": "string" }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "trace_id": "trc_202",
+      "agent": "builder_backend",
+      "kind": "implementation_artifact_v1",
+      "artifact_id": "art_be_202",
+      "micro_spec_id": "ms_202",
+      "endpoints_changed": ["POST /api/profile/display-name"],
+      "contracts_changed": ["DisplayNameUpdateRequest", "ProfileResponse"],
+      "tests_added_or_updated": ["profile-update.contract.test.ts"],
+      "migration_request": { "needed": false, "description": "" },
+      "parent_artifact_ids": ["ms_202"],
+      "started_at": "2026-04-13T09:10:00-07:00",
+      "finished_at": "2026-04-13T09:20:00-07:00",
+      "status": "ok",
+      "reason": "Added endpoint behavior without schema change"
+    }
+  ]
+}
