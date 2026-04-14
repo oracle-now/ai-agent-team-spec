@@ -1,0 +1,5 @@
+# OpenHands Software Agent SDK
+openhands-ai>=1.5.0
+
+# JSON Schema validation
+jsonschema>=4.23.0
