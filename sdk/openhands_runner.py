@@ -12,16 +12,15 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import pathlib
 import uuid
-from typing import Any
 
 try:
-    from openhands.core.config import AppConfig, LLMConfig
-    from openhands.core.main import create_runtime, run_controller
-    from openhands.events.action import MessageAction
+    from pydantic import SecretStr
+    from openhands.sdk import LLM, Agent, Conversation, Tool
+    from openhands.tools.file_editor import FileEditorTool
+    from openhands.tools.terminal import TerminalTool
 except ImportError as e:
     raise SystemExit(
         "openhands-ai is not installed.\n"
@@ -32,9 +31,7 @@ except ImportError as e:
 # Paths
 # ---------------------------------------------------------------------------
 REPO_ROOT = pathlib.Path(__file__).parent.parent
-DOCS_DIR = REPO_ROOT / "docs" / "agents"
-PROMPTS_DIR = DOCS_DIR / "prompts"
-SCHEMAS_DIR = DOCS_DIR / "schemas"
+PROMPTS_DIR = REPO_ROOT / "docs" / "agents" / "prompts"
 
 
 def _load_prompt(name: str) -> str:
@@ -45,16 +42,8 @@ def _load_prompt(name: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def _load_schema(name: str) -> dict[str, Any]:
-    """Load a JSON schema from docs/agents/schemas/."""
-    path = SCHEMAS_DIR / f"{name}.json"
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
 # ---------------------------------------------------------------------------
-# Agent runner
+# Pipeline
 # ---------------------------------------------------------------------------
 
 AGENT_SEQUENCE = [
@@ -67,42 +56,43 @@ AGENT_SEQUENCE = [
 ]
 
 
-def build_config(llm_model: str, api_key: str) -> AppConfig:
-    """Build an OpenHands AppConfig from env / CLI args."""
-    llm_cfg = LLMConfig(
-        model=llm_model,
-        api_key=api_key,
-    )
-    config = AppConfig(llms={"default": llm_cfg})
-    return config
-
-
 def run_pipeline(task: str, llm_model: str, api_key: str) -> None:
     """Run the full Orchestrator -> Planner -> Builder -> Critic -> Platform pipeline."""
     trace_id = str(uuid.uuid4())
+    cwd = str(pathlib.Path.cwd())
+
     print(f"\n=== ai-agent-team-spec run  trace_id={trace_id} ===")
     print(f"Task : {task}\n")
 
-    config = build_config(llm_model, api_key)
+    llm = LLM(
+        model=llm_model,
+        api_key=SecretStr(api_key),
+    )
 
     for agent_name in AGENT_SEQUENCE:
         print(f"--- [{agent_name}] starting ---")
+
         system_prompt = _load_prompt(agent_name)
-        full_task = (
+        full_message = (
             f"trace_id: {trace_id}\n\n"
             f"{system_prompt}\n\n"
             f"--- TASK ---\n{task}"
         )
-        runtime = create_runtime(config)
-        try:
-            result = run_controller(
-                config=config,
-                initial_user_action=MessageAction(content=full_task),
-                runtime=runtime,
-            )
-            print(f"--- [{agent_name}] done  status={result.state} ---\n")
-        finally:
-            runtime.close()
+
+        agent = Agent(
+            llm=llm,
+            tools=[
+                Tool(name=TerminalTool.name),
+                Tool(name=FileEditorTool.name),
+            ],
+        )
+
+        conversation = Conversation(agent=agent, workspace=cwd)
+        conversation.send_message(full_message)
+        conversation.run()
+
+        status = conversation.state.execution_status
+        print(f"--- [{agent_name}] done  status={status} ---\n")
 
     print(f"=== Pipeline complete  trace_id={trace_id} ===")
 
