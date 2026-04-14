@@ -123,13 +123,15 @@ def main() -> None:
     )
     parser.add_argument(
         "--api-key",
-        default=os.getenv("LLM_API_KEY", ""),
-        help="LLM API key (default: env LLM_API_KEY)",
+        default=os.getenv("LLM_API_KEY") or os.getenv("ANTHROPIC_API_KEY", ""),
+        help="LLM API key (default: env LLM_API_KEY or ANTHROPIC_API_KEY)",
     )
     args = parser.parse_args()
 
     if not args.api_key:
-        raise SystemExit("Set LLM_API_KEY env var or pass --api-key")
+        raise SystemExit(
+            "Set LLM_API_KEY or ANTHROPIC_API_KEY env var, or pass --api-key"
+        )
 
     run_pipeline(task=args.task, llm_model=args.model, api_key=args.api_key)
 

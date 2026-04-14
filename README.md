@@ -150,11 +150,26 @@ pip install -r requirements.txt
 
 ### Run the pipeline
 
+#### Local run
+
 ```bash
-export LLM_API_KEY="your-api-key"
+export ANTHROPIC_API_KEY="your-api-key"
 export LLM_MODEL="anthropic/claude-sonnet-4-5-20250929"   # optional, this is the default
 
 python sdk/openhands_runner.py --task "Add a /health endpoint that returns {status: ok}"
+```
+
+`LLM_API_KEY` is also accepted as a compatibility alias for `ANTHROPIC_API_KEY`.
+
+#### GitHub Actions
+
+Store your key as a repository secret named `ANTHROPIC_API_KEY`, then map it into your workflow:
+
+```yaml
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  LLM_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # compatibility alias during transition
+  LLM_MODEL: anthropic/claude-sonnet-4-5-20250929
 ```
 
 The runner:
