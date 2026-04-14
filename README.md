@@ -130,3 +130,44 @@ See `release-policy.json` for:
 4. **Platform as single writer** — no agent mutates shared state except Platform
 5. **Observability from day one** — trace IDs, structured logs, failure codes in every schema
 6. **Fail loudly** — `agent_error_v1` with specific codes, never silent failures
+
+
+---
+
+## OpenHands SDK
+
+This repo ships a ready-to-run pipeline integration using the [OpenHands Software Agent SDK](https://pypi.org/project/openhands-ai/).
+
+### Install
+
+```bash
+# Python 3.12+ required
+pip install openhands-ai>=1.5.0
+
+# or install everything from this repo
+pip install -r requirements.txt
+```
+
+### Run the pipeline
+
+```bash
+export LLM_API_KEY="your-api-key"
+export LLM_MODEL="anthropic/claude-sonnet-4-5-20250929"   # optional, this is the default
+
+python sdk/openhands_runner.py --task "Add a /health endpoint that returns {status: ok}"
+```
+
+The runner:
+1. Loads each agent's system prompt from `docs/agents/prompts/`
+2. Passes it to the OpenHands SDK as the agent's context
+3. Runs the full **Orchestrator → Planner → Builder BE → Builder FE → Critic → Platform** sequence
+4. Propagates a `trace_id` through every step for end-to-end observability
+
+### Repository structure (updated)
+
+```
+sdk/
+└── openhands_runner.py   # Pipeline runner via OpenHands SDK
+requirements.txt          # openhands-ai + jsonschema
+pyproject.toml            # Python project metadata
+```
